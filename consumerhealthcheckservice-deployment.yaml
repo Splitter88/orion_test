@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumerhealthcheckservice
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: consumerhealthcheckservice
+  template:
+    metadata:
+      labels:
+        app: consumerhealthcheckservice
+    spec:
+      containers:
+      - name: consumerhealthcheckservice
+        image: 192.168.49.2:5000/consumerhealthcheckservice:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: KAFKA_BOOTSTRAP_SERVERS
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consumerhealthcheckservice
+spec:
+  selector:
+    app: consumerhealthcheckservice
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthcheckservice
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: healthcheckservice
+  template:
+    metadata:
+      labels:
+        app: healthcheckservice
+    spec:
+      containers:
+      - name: healthcheckservice
+        image: 192.168.49.2:5000/healthcheckservice:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: KAFKA_BOOTSTRAP_SERVERS
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: healthcheckservice
+spec:
+  selector:
+    app: healthcheckservice
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
