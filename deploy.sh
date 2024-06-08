@@ -16,3 +16,4 @@ pulumi config set interview-test:kubeconfig $HOME/.kube/config --plaintext
 # Run Pulumi
 echo "Running Pulumi..."
 pulumi up
+
