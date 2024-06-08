@@ -27,7 +27,7 @@ internal_registry = f'{registry_service_ip}:{registry_port}'
 def replace_placeholders(file_path, registry_url):
     with open(file_path, 'r') as file:
         content = file.read()
-    content = content.replace('{{REGISTRY_URL}}', registry_service_ip)
+    content = content.replace('{{REGISTRY_URL}}', registry_url)
     temp_file_path = f'/tmp/updated-{file_path}'
     with open(temp_file_path, 'w') as file:
         file.write(content)
@@ -81,13 +81,13 @@ grafana = Chart(
 )
 
 # Replace placeholders in YAML files and apply
-updated_healthcheckservice_deployment_yaml = replace_placeholders('healthcheckservice-deployment.yaml', registry_service_ip)
-updated_consumerhealthcheckservice_deployment_yaml = replace_placeholders('consumerhealthcheckservice-deployment.yaml', registry_service_ip)
+updated_healthcheckservice_deployment_yaml = replace_placeholders('healthcheckservice-deployment.yaml', internal_registry)
+updated_consumerhealthcheckservice_deployment_yaml = replace_placeholders('consumerhealthcheckservice-deployment.yaml', internal_registry)
 
 # Apply Kubernetes YAML manifests directly
 kafka_configmap_yaml = k8s_yaml.ConfigFile('kafka-configmap', file='kafka-configmap.yaml', opts=ResourceOptions(provider=k8s_provider))
-healthcheckservice_deployment_yaml = k8s_yaml.ConfigFile('healthcheckservice-deployment', file='healthcheckservice-deployment.yaml', opts=ResourceOptions(provider=k8s_provider))
-consumerhealthcheckservice_deployment_yaml = k8s_yaml.ConfigFile('consumerhealthcheckservice-deployment', file='consumerhealthcheckservice-deployment.yaml', opts=ResourceOptions(provider=k8s_provider))
+healthcheckservice_deployment_yaml = k8s_yaml.ConfigFile('healthcheckservice-deployment', file=updated_healthcheckservice_deployment_yaml, opts=ResourceOptions(provider=k8s_provider))
+consumerhealthcheckservice_deployment_yaml = k8s_yaml.ConfigFile('consumerhealthcheckservice-deployment', file=updated_consumerhealthcheckservice_deployment_yaml, opts=ResourceOptions(provider=k8s_provider))
 healthcheckservice_hpa_yaml = k8s_yaml.ConfigFile('healthcheckservice-hpa', file='healthcheckservice-hpa.yaml', opts=ResourceOptions(provider=k8s_provider))
 consumerhealthcheckservice_hpa_yaml = k8s_yaml.ConfigFile('consumerhealthcheckservice-hpa', file='consumerhealthcheckservice-hpa.yaml', opts=ResourceOptions(provider=k8s_provider))
 
