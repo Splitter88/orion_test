@@ -6,7 +6,7 @@ import threading
 import logging
 
 app = Flask(__name__)
-producer = KafkaProducer(bootstrap_servers='kafka.dev.svc.cluster.local:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+producer = KafkaProducer(bootstrap_servers='kafka-headless.dev.svc.cluster.local:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 logging.basicConfig(level=logging.INFO)
 
 def perform_health_check():

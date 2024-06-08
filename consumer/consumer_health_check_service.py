@@ -5,7 +5,7 @@ import threading
 import logging
 
 app = Flask(__name__)
-consumer = KafkaConsumer('health_checks_topic', bootstrap_servers='kafka.dev.svc.cluster.local:9092', value_deserializer=lambda m: json.loads(m.decode('utf-8')))
+consumer = KafkaConsumer('health_checks_topic', bootstrap_servers='kafka-headless.dev.svc.cluster.local:9092', value_deserializer=lambda m: json.loads(m.decode('utf-8')))
 latest_health_check = None
 logging.basicConfig(level=logging.INFO)
 

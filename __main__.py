@@ -54,31 +54,7 @@ kafka = Chart(
     opts=ResourceOptions(provider=k8s_provider)
 )
 
-# Deploy Prometheus using Helm
-prometheus = Chart(
-    'prometheus',
-    ChartOpts(
-        chart='prometheus',
-        fetch_opts=FetchOpts(
-            repo='https://charts.bitnami.com/bitnami'
-        ),
-        namespace=namespace
-    ),
-    opts=ResourceOptions(provider=k8s_provider)
-)
 
-# Deploy Grafana using Helm
-grafana = Chart(
-    'grafana',
-    ChartOpts(
-        chart='grafana',
-        fetch_opts=FetchOpts(
-            repo='https://charts.bitnami.com/bitnami'
-        ),
-        namespace=namespace
-    ),
-    opts=ResourceOptions(provider=k8s_provider)
-)
 
 # Replace placeholders in YAML files and apply
 updated_healthcheckservice_deployment_yaml = replace_placeholders('healthcheckservice-deployment.yaml', internal_registry)
