@@ -4,7 +4,8 @@ import time
 from pulumi import ResourceOptions, export, Config, Output
 from pulumi_kubernetes import Provider, yaml as k8s_yaml
 from pulumi_kubernetes.helm.v3 import Chart, ChartOpts, FetchOpts
-from pulumi_docker import Image, DockerBuildArgs
+from pulumi_command import local
+from pulumi_docker import Image, DockerBuildArgs  # Ensure this import is included
 
 def get_minikube_ip():
     result = subprocess.run(["minikube", "ip"], stdout=subprocess.PIPE, text=True)
@@ -34,7 +35,6 @@ def replace_placeholders(file_path, registry_url):
         file.write(content)
     return temp_file_path
 
-
 # Configure Kubernetes provider
 config = Config()
 kubeconfig_path = config.require('kubeconfig')
@@ -56,7 +56,12 @@ kafka = Chart(
     opts=ResourceOptions(provider=k8s_provider)
 )
 
-
+# Command to create Kafka topic using the helper script
+create_kafka_topic = local.Command(
+    'createKafkaTopic',
+    create=f"./create_kafka_topic.sh {namespace}",
+    opts=ResourceOptions(depends_on=[kafka])
+)
 
 # Replace placeholders in YAML files and apply
 updated_healthcheckservice_deployment_yaml = replace_placeholders('healthcheckservice-deployment.yaml', internal_registry)

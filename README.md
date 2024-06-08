@@ -16,4 +16,5 @@ This project sets up a local Kubernetes environment using Minikube, deploys Kafk
 
 1. **Install dependencies**:
 2. **Run deploy.sh**:
-    *This will start minikube, configure kubeconfig path for Pulumi and run the Pulumi program to deploy the environment.
+    *This will start minikube, configure kubeconfig path for Pulumi and run the Pulumi program to deploy the environment.*
+        **Alternatively, setup.sh can be used as a backup, but it is not fully supported.**
