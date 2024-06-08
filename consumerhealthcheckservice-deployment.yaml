@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: consumerhealthcheckservice
-        image: 192.168.49.2:5000/consumerhealthcheckservice:latest
+        image: {{REGISTRY_URL}}/consumerhealthcheckservice:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
         env:

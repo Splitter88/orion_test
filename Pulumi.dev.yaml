@@ -1,0 +1,2 @@
+config:
+  interview-test:kubeconfig: /home/alexm/.kube/config

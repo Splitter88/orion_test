@@ -1,33 +1,27 @@
 from flask import Flask, jsonify
-import json
-import logging
 from kafka import KafkaConsumer
-from kafka.errors import KafkaError
-from pythonjsonlogger import jsonlogger
+import json
+import threading
+import logging
 
 app = Flask(__name__)
-consumer = KafkaConsumer('health_checks_topic', bootstrap_servers='kafka.headless:9092', value_deserializer=lambda m: json.loads(m.decode('utf-8')))
-latest_message = {}
+consumer = KafkaConsumer('health_checks_topic', bootstrap_servers='kafka.dev.svc.cluster.loca:9092', value_deserializer=lambda m: json.loads(m.decode('utf-8')))
+latest_health_check = None
+logging.basicConfig(level=logging.INFO)
 
-logHandler = logging.StreamHandler()
-formatter = jsonlogger.JsonFormatter()
-logHandler.setFormatter(formatter)
-app.logger.addHandler(logHandler)
-app.logger.setLevel(logging.INFO)
+def consume_health_checks():
+    global latest_health_check
+    for message in consumer:
+        latest_health_check = message.value
+        logging.info(f"Consumed: {latest_health_check}")
 
 @app.route('/get_latest_health_check', methods=['GET'])
 def get_latest_health_check():
-    global latest_message
-    try:
-        for message in consumer:
-            latest_message = message.value
-        return jsonify(latest_message)
-    except KafkaError as e:
-        app.logger.error(f"Failed to consume health check data: {e}")
-        return jsonify({'error': 'Failed to consume health check data'}), 500
-    except Exception as e:
-        app.logger.error(f"Unexpected error: {e}")
-        return jsonify({'error': 'Unexpected error occurred'}), 500
+    if latest_health_check:
+        return jsonify(latest_health_check), 200
+    else:
+        return jsonify({"message": "No health check available"}), 404
 
-if __name__ == "__main__":
+if __name__ == '__main__':
+    threading.Thread(target=consume_health_checks).start()
     app.run(host='0.0.0.0', port=5000)

@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: healthcheckservice
-        image: 192.168.49.2:5000/healthcheckservice:latest
+        image: {{REGISTRY_URL}}/healthcheckservice:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
         env:
