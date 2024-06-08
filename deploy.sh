@@ -7,6 +7,7 @@ minikube start --driver=docker --insecure-registry "10.0.0.0/24" --addons=ingres
 # Configure Docker to use Minikube's Docker daemon
 echo "Configuring Docker to use Minikube's Docker daemon..."
 eval $(minikube -p minikube docker-env)
+kubectl create ns dev
 
 # Set kubeconfig path for Pulumi
 echo "Setting kubeconfig path for Pulumi..."

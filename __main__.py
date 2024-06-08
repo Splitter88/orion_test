@@ -4,6 +4,8 @@ from pulumi import ResourceOptions, export, Config
 from pulumi_kubernetes import Provider, yaml as k8s_yaml
 from pulumi_kubernetes.helm.v3 import Chart, ChartOpts, FetchOpts
 from pulumi_docker import Image, DockerBuildArgs
+from pulumi_command import local
+
 
 def get_minikube_ip():
     result = subprocess.run(["minikube", "ip"], stdout=subprocess.PIPE, text=True)
@@ -32,6 +34,12 @@ def replace_placeholders(file_path, registry_url):
     with open(temp_file_path, 'w') as file:
         file.write(content)
     return temp_file_path
+
+# Function to create Kafka topic using the script
+def create_kafka_topic():
+    local.Command("createKafkaTopic",
+        create="./create_topic.sh"
+    )
 
 # Configure Kubernetes provider
 config = Config()
@@ -66,7 +74,7 @@ healthcheckservice_deployment_yaml = k8s_yaml.ConfigFile('healthcheckservice-dep
 consumerhealthcheckservice_deployment_yaml = k8s_yaml.ConfigFile('consumerhealthcheckservice-deployment', file=updated_consumerhealthcheckservice_deployment_yaml, opts=ResourceOptions(provider=k8s_provider))
 healthcheckservice_hpa_yaml = k8s_yaml.ConfigFile('healthcheckservice-hpa', file='healthcheckservice-hpa.yaml', opts=ResourceOptions(provider=k8s_provider))
 consumerhealthcheckservice_hpa_yaml = k8s_yaml.ConfigFile('consumerhealthcheckservice-hpa', file='consumerhealthcheckservice-hpa.yaml', opts=ResourceOptions(provider=k8s_provider))
-
+create_kafka_topic()
 # Docker images
 # Build and push the health-check service Docker image
 health_check_image = Image(
