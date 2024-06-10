@@ -56,6 +56,49 @@ kafka = Chart(
     opts=ResourceOptions(provider=k8s_provider)
 )
 
+# Deploy Prometheus using Helm
+prometheus = Chart(
+    'prometheus',
+    ChartOpts(
+        chart='prometheus',
+        fetch_opts=FetchOpts(
+            repo='https://prometheus-community.github.io/helm-charts'
+        ),
+        namespace=namespace
+    ),
+    opts=ResourceOptions(provider=k8s_provider)
+)
+# Command to check if Prometheus is ready
+check_prometheus_ready = local.Command(
+    'checkPrometheusReady',
+    create="""
+    for i in {1..30}; do
+        kubectl rollout status deployment/prometheus-server -n dev && break || sleep 10;
+    done
+    """,
+    opts=ResourceOptions(depends_on=[prometheus])
+)
+
+# Command to expose Prometheus server service
+expose_prometheus_service = local.Command(
+    'exposePrometheusService',
+    create="kubectl expose service prometheus-server --type=NodePort --target-port=9090 --name=prometheus-server-np -n dev",
+    opts=ResourceOptions(depends_on=[check_prometheus_ready])
+)
+
+# Deploy Grafana using Helm
+grafana = Chart(
+    'grafana',
+    ChartOpts(
+        chart='grafana',
+        fetch_opts=FetchOpts(
+            repo='https://grafana.github.io/helm-charts'
+        ),
+        namespace=namespace
+    ),
+    opts=ResourceOptions(provider=k8s_provider)
+)
+
 # Command to create Kafka topic using the helper script
 create_kafka_topic = local.Command(
     'createKafkaTopic',
